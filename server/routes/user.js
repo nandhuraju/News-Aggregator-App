@@ -4,6 +4,7 @@ const verifyToken = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const CustomNews = require('../models/CustomNews');
 const router = express.Router();
+require('dotenv').config(); 
 
 // Get user categories
 router.get('/', verifyToken, async (req, res) => {
@@ -29,7 +30,7 @@ router.get('/news', verifyToken, async (req, res) => {
       axios.get(`https://newsapi.org/v2/top-headlines`, {
         params: {
           country: 'in',
-          apiKey: '3fec3412b6514dc58658c1e5ed2233f6',
+          apiKey: process.env.NEWS_API_KEY,
           category: category.trim(),
           language: 'en',
           pageSize: 10
@@ -80,10 +81,15 @@ router.get('/bookmarks', verifyToken, async (req, res) => {
 
 
 // Update categories
-router.post('/updateCategories', verifyToken, async (req, res) => {
+
+router.put('/updateCategories', verifyToken, async (req, res) => {
   try {
     const { categories } = req.body;
-    const user = req.user;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     user.categories = categories;
     await user.save();
@@ -94,6 +100,8 @@ router.post('/updateCategories', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to update categories' });
   }
 });
+
+
 
 // Add custom news
 router.post('/addNews', verifyToken, async (req, res) => {
