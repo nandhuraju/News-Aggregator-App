@@ -1,96 +1,117 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const categoriesList = [
-  'business', 'entertainment', 'general', 'health',
-  'science', 'sports', 'technology'
-];
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UpdateCategories = () => {
+  const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the current user categories
     const fetchCategories = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('/api/user/', {
+        if (!token) {
+          setError('User not authenticated');
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch('/api/update/categories', {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        if (res.status === 200) {
-          setSelectedCategories(res.data.categories);
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data.categories);
+          setSelectedCategories(data.selectedCategories);
         } else {
-          setMessage('Failed to fetch user categories');
+          setError('Error fetching categories');
         }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        setMessage('Error fetching categories');
+      } catch (err) {
+        setError(`Error fetching categories: ${err.message}`);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCategories();
   }, []);
 
-  const handleChange = (e) => {
-    const category = e.target.name;
-    setSelectedCategories(prevSelected =>
-      prevSelected.includes(category)
-        ? prevSelected.filter(c => c !== category)
-        : [...prevSelected, category]
-    );
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.put('/api/user/updateCategories', { categories: selectedCategories }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-  
-      if (res.status === 200) {
-        setMessage('Categories updated successfully');
-      } else {
-        setMessage('Failed to update categories');
-      }
-    } catch (error) {
-      console.error('Error updating categories:', error);
-      setMessage('Failed to update categories');
+  const handleCheckboxChange = (event) => {
+    const value = event.target.value;
+    if (selectedCategories.includes(value)) {
+      setSelectedCategories(selectedCategories.filter((category) => category !== value));
+    } else {
+      setSelectedCategories([...selectedCategories, value]);
     }
   };
-  
-  
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('User not authenticated');
+        return;
+      }
+
+      const res = await fetch('/api/update/updatecategories', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ categories: selectedCategories }),
+      });
+
+      if (res.ok) {
+        alert('Categories updated successfully');
+        navigate('/categories'); // Redirect to another page if necessary
+      } else {
+        setError('Error updating categories');
+      }
+    } catch (err) {
+      setError(`Error updating categories: ${err.message}`);
+    }
+  };
+
+  if (loading) return <div className="text-center mt-20">Loading...</div>;
+  if (error) return <div className="text-center mt-20 text-red-600">{error}</div>;
 
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Update Categories</h1>
-      {message && <div className="mb-4 text-red-500">{message}</div>}
+    <div className="max-w-md mx-auto bg-white p-8 shadow-md rounded mt-4">
+      <h2 className="text-2xl font-bold mb-4">Update Categories</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          {categoriesList.map(category => (
-            <div key={category} className="mb-2">
-              <label className="inline-flex items-center">
+          <label className="block text-sm font-bold mb-2">Categories</label>
+          <div>
+            {categories.map((category) => (
+              <label key={category} className="inline-flex items-center mr-4">
                 <input
                   type="checkbox"
-                  name={category}
+                  value={category}
                   checked={selectedCategories.includes(category)}
-                  onChange={handleChange}
+                  onChange={handleCheckboxChange}
                   className="form-checkbox"
                 />
-                <span className="ml-2">{category}</span>
+                <span className="ml-2 capitalize">{category}</span>
               </label>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Update Categories
-        </button>
+        {error && <p className="text-red-500">{error}</p>}
+        <div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded"
+          >
+            Update Categories
+          </button>
+        </div>
       </form>
     </div>
   );

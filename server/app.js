@@ -5,6 +5,7 @@ const cors = require("cors");
 // const newsRoutes = require("./routes/news"); 
 const authRoute = require("./routes/auth");
 const userRoute = require("./routes/user");
+const updateRoute=require("./routes/updateRoutes");
 
 const cookieParser = require("cookie-parser");
 
@@ -20,7 +21,7 @@ app.use(
 // app.use("/news", newsRoutes); 
 app.use("/auth", authRoute);
 app.use("/user", userRoute)
-
+app.use("/update", updateRoute)
 
 
 

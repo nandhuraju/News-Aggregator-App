@@ -6,34 +6,34 @@ const Homepage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setError('User not authenticated');
-          setLoading(false);
-          return;
-        }
-
-        const res = await axios.get('/api/user/news', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (res.status === 200) {
-          setArticles(res.data.articles);
-        } else {
-          setError('Error fetching news');
-        }
-      } catch (err) {
-        setError(`Error fetching news: ${err.message}`);
-      } finally {
+  const fetchNews = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('User not authenticated');
         setLoading(false);
+        return;
       }
-    };
 
+      const res = await axios.get('/api/user/news', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.status === 200) {
+        setArticles(res.data.articles);
+      } else {
+        setError('Error fetching news');
+      }
+    } catch (err) {
+      setError(`Error fetching news: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchNews();
   }, []);
 

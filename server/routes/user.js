@@ -80,29 +80,6 @@ router.get('/bookmarks', verifyToken, async (req, res) => {
 });
 
 
-// Update categories
-
-router.put('/updateCategories', verifyToken, async (req, res) => {
-  try {
-    const { categories } = req.body;
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    user.categories = categories;
-    await user.save();
-
-    res.status(200).json({ message: 'Categories updated successfully' });
-  } catch (error) {
-    console.error('Error updating categories:', error);
-    res.status(500).json({ error: 'Failed to update categories' });
-  }
-});
-
-
-
 // Add custom news
 router.post('/addNews', verifyToken, async (req, res) => {
   try {

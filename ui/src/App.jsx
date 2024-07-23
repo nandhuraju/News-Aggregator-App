@@ -11,6 +11,7 @@ import SignupPage from "./pages/SignupPage"
 import IndexPage from "./pages/IndexPage"
 import Bookmarks from "./components/Bookmarks"
 import AddNews from "./components/AddNews"
+
 import UpdateCategories from "./components/UpdateCategories"
 
 function App() {
