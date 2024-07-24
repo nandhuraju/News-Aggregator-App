@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UpdateCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -11,14 +11,14 @@ const UpdateCategories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          setError('User not authenticated');
+          setError("User not authenticated");
           setLoading(false);
           return;
         }
 
-        const res = await fetch('/api/update/categories', {
+        const res = await fetch("/api/update/categories", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -29,7 +29,7 @@ const UpdateCategories = () => {
           setCategories(data.categories);
           setSelectedCategories(data.selectedCategories);
         } else {
-          setError('Error fetching categories');
+          setError("Error fetching categories");
         }
       } catch (err) {
         setError(`Error fetching categories: ${err.message}`);
@@ -44,7 +44,9 @@ const UpdateCategories = () => {
   const handleCheckboxChange = (event) => {
     const value = event.target.value;
     if (selectedCategories.includes(value)) {
-      setSelectedCategories(selectedCategories.filter((category) => category !== value));
+      setSelectedCategories(
+        selectedCategories.filter((category) => category !== value)
+      );
     } else {
       setSelectedCategories([...selectedCategories, value]);
     }
@@ -53,26 +55,26 @@ const UpdateCategories = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        setError('User not authenticated');
+        setError("User not authenticated");
         return;
       }
 
-      const res = await fetch('/api/update/updatecategories', {
-        method: 'PUT',
+      const res = await fetch("/api/update/updatecategories", {
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ categories: selectedCategories }),
       });
 
       if (res.ok) {
-        alert('Categories updated successfully');
-        navigate('/categories'); // Redirect to another page if necessary
+        alert("Categories updated successfully");
+        navigate("/categories"); // Redirect to another page if necessary
       } else {
-        setError('Error updating categories');
+        setError("Error updating categories");
       }
     } catch (err) {
       setError(`Error updating categories: ${err.message}`);
@@ -80,7 +82,8 @@ const UpdateCategories = () => {
   };
 
   if (loading) return <div className="text-center mt-20">Loading...</div>;
-  if (error) return <div className="text-center mt-20 text-red-600">{error}</div>;
+  if (error)
+    return <div className="text-center mt-20 text-red-600">{error}</div>;
 
   return (
     <div className="max-w-md mx-auto bg-white p-8 shadow-md rounded mt-4">
